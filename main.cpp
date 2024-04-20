@@ -1,139 +1,282 @@
 #include <iostream>
-
 using namespace std;
 
-struct Nodo {
-    int* data;
-    Nodo* next;
-    int index;
 
-    Nodo() {
-        data = new int[10];
-        next = nullptr;
-        index = 0;
+struct nodo {
+    int* valor;
+    int* INI = NULL;
+    int* FIN = NULL;
+    nodo* next = NULL;
+
+    nodo(nodo* nex = NULL) {
+        valor = new int[10];
+        INI = valor;
+        FIN = valor + 10;
+        next = nex;
     }
 };
 
 struct Elementor {
-    Nodo* head;
+
+    int* p = NULL;
+    int* q = NULL;
+    nodo* s = NULL;
+    nodo* t = NULL;
+    bool flag = false;
+    int size_vector;
 
     Elementor() {
-        head = nullptr;
+        size_vector = 10;
+        t = new nodo(t);
+        s = t;
+        p = t->INI;
+        q = p;
     }
 
-    void add(int value) {
-        Nodo* curr = head;
-        Nodo* prev = nullptr;
-        while (curr != nullptr && curr->index == 10) {
-            prev = curr;
-            curr = curr->next;
+    ~Elementor()
+    {
+        for (nodo* tmp = s; tmp;)
+        {
+            nodo* tmp_2 = tmp;
+            tmp = tmp->next;
+            delete tmp_2;
         }
-        if (curr == nullptr) {
-            curr = new Nodo;
-            curr->next = head;
-            head = curr;
-        }
-        int* ptr = curr->data;
-        while (ptr < curr->data + curr->index && *ptr < value) {
-            ptr++;
-        }
-        for (int* i = curr->data + curr->index; i > ptr; i--) {
-            *i = *(i - 1);
-        }
-        *ptr = value;
-        curr->index++;
     }
+    void push(int valor) {
 
-    void del(int value) {
-        Nodo* prev = nullptr;
-        Nodo* curr = head;
-        while (curr != nullptr) {
-            int* ptr = curr->data;
-            while (ptr < curr->data + curr->index && *ptr != value) {
-                ptr++;
+
+
+        if (p == t->FIN) {
+            t = new nodo(t); t->next->next = t;
+            t->next = nullptr;
+            p = t->INI;
+            *p = valor;
+            p++;
+            merge(valor);
+
+
+        }
+        else {
+            if (!flag) {
+                q--; flag = true; *p = valor; p++;
             }
-            if (ptr < curr->data + curr->index) {
-                for (int* i = ptr; i < curr->data + curr->index - 1; i++) {
-                    *i = *(i + 1);
-                }
-                curr->index--;
-                if (curr->index == 0) {
-                    if (prev == nullptr) {
-                        head = curr->next;
+            else {
+                *p = valor; p++; merge(valor);
+            }
+        }
+        flag = true;
+    }
+
+    void merge(int valor)
+    {
+        nodo* prev = t;
+        nodo* past = t;
+        int* m = q + 1;
+        nodo* for_m = s;
+        bool falg = false;
+        for (; m != p && !falg; m++)
+        {
+            if (m == for_m->FIN)
+            {
+                m = for_m->next->INI;
+                for_m = for_m->next;
+            }
+            if (*m > valor)
+            {
+                falg = true;
+                for (int* i = p - 1, *j = i - 1; j != m - 1; i--, j--)
+                {
+                    nodo* j_past = s;
+                    nodo* i_prev = s;
+                    for (; j_past != NULL && j_past->next != past; j_past = j_past->next);
+                    for (; i_prev != NULL && i_prev->next != prev; i_prev = i_prev->next);
+                    if (past != s)
+                    {
+                        if (j == past->INI - 1)
+                        {
+                            j = j_past->FIN - 1;
+                            past = j_past;
+                        }
                     }
-                    else {
-                        prev->next = curr->next;
+                    if (i == prev->INI - 1)
+                    {
+                        i = i_prev->FIN - 1;
+                        prev = i_prev;
                     }
-                    Nodo* temp = curr;
-                    curr = curr->next;
-                    delete[] temp->data;
-                    delete temp;
+                    swap(*i, *j);
                 }
-                else {
-                    curr = curr->next;
-                }
-                return;
             }
-            prev = curr;
-            curr = curr->next;
         }
     }
 
-    bool find(int value, Nodo** result) {
-        Nodo* curr = head;
-        while (curr != nullptr) {
-            int* ptr = curr->data;
-            while (ptr < curr->data + curr->index && *ptr != value) {
-                ptr++;
-            }
-            if (ptr < curr->data + curr->index) {
-                *result = curr;
-                return true;
-            }
-            curr = curr->next;
+    void pop(int valor)
+    {
+        bool found{ false }; nodo* i_ = s; int* spot = NULL; nodo* spotn = s;
+
+        if (p - 1 == q || p == q)
+        {
+            cout << "TA VACIO" << endl;
         }
-        return false;
+
+
+        else
+        {
+            for (int* i = q + 1; !found && i != p; i++)
+            {
+                if (i_->FIN == i)
+                {
+                    i = i_->next->INI;
+                    i_ = i_->next;
+                    spotn = spotn->next;
+                }
+                if (*i == valor)
+                {
+                    found = true;
+                    spot = i;
+                }
+
+            }
+            if (found)
+            {
+
+
+                if (p - 2 == t->INI - 1)
+                {
+                    nodo* j_spot = spotn;
+                    nodo* i_spot = spotn;
+                    for (int* j = spot, *i = j + 1; i != p; i++, j++)
+                    {
+                        if (i_spot != t)
+                        {
+                            if (i == i_spot->FIN)
+                            {
+                                i = i_spot->next->INI;
+                                i_spot = i_spot->next;
+                            }
+                        }
+                        if (j == j_spot->FIN)
+                        {
+                            j = j_spot->next->INI;
+                            j_spot = j_spot->next;
+                        }
+                        swap(*i, *j);
+                    }
+
+                    nodo* tmp = t;
+                    nodo* anterior = NULL;
+                    for (nodo* i = s; i != t; i = i->next)
+                    {
+                        if (i->next == t)
+                        {
+                            anterior = i;
+                        }
+                    }
+                    t = anterior;
+                    anterior->next = NULL;
+                    p = t->FIN;
+                    delete  tmp;
+                }
+                else
+                {
+                    nodo* j_spot = spotn;
+                    nodo* i_spot = spotn;
+                    for (int* j = spot, *i = j + 1; i != p; i++, j++)
+                    {
+                        if (i_spot != t)
+                        {
+                            if (i == i_spot->FIN)
+                            {
+                                i = i_spot->next->INI;
+                                i_spot = i_spot->next;
+                            }
+                        }
+                        if (j == j_spot->FIN)
+                        {
+                            j = j_spot->next->INI;
+                            j_spot = j_spot->next;
+                        }
+                        swap(*i, *j);
+                    }
+                    p--;
+                }
+            }
+            else
+            {
+                cout << "No existe \n";
+            }
+        }
     }
 
-    void print() {
-        Nodo* curr = head;
-        while (curr != nullptr) {
-            int* ptr = curr->data;
-            while (ptr < curr->data + curr->index) {
-                cout << *ptr << " ";
-                ptr++;
+    void find(nodo* i, int*& begin, int*& end)
+    {
+        bool comp1 = false;
+        bool comp2 = false;
+        for (int* k = i->INI; k != i->FIN; k++)
+        {
+            if (k == q + 1)
+            {
+                begin = k;
+                comp1 = true;
             }
-            cout << "->";
-            curr = curr->next;
+            if (k == p - 1)
+            {
+                end = k + 1;
+                comp2 = true;
+            }
         }
+        if (!comp1)
+        {
+            begin = i->INI;
+        }
+        if (!comp2)
+        {
+            end = i->FIN;
+        }
+
     }
+
+    void print()
+    {
+        for (nodo* tmp = s; tmp; tmp = tmp->next)
+        {
+            int* start = NULL; int* end = NULL;
+            find(tmp, start, end);
+            for (; start != end; start++)
+            {
+                cout << *start << ",";
+            }
+            cout << "  ->  ";
+        }
+        cout << endl;
+    }
+
+
+
 };
 
 int main() {
-    Elementor list;
-    list.add(5);
-    list.add(3);
-    list.add(8);
-    list.add(1);
-    list.add(12);
-    list.add(13);
-    list.add(14);
-    list.add(15);
-    list.add(18);
-    list.add(19);
-    list.add(-1);
-    list.add(-5);
-    list.print(); 
-    cout << "\n";
-    list.del(3);
-    list.print();
-    cout << "\n";
-    Nodo* found = nullptr;
-    if (list.find(100, &found)) {
-        cout << "Found: " << *(found->data + 1) << endl; 
-    }
-    else {
-        cout << "Element not found" << endl;
-    }
+    Elementor A;
+    A.push(23); 
+    A.push(4); 
+    A.push(42); 
+    A.push(24); 
+    A.push(1); 
+    A.push(77); 
+    A.push(77); 
+    A.push(23); 
+    A.pop(77);
+    A.print();
+
+
+    A.pop(77);
+    A.print();
+    A.pop(77);
+    A.print();
+    A.pop(77);
+    A.print();
+    A.pop(77);
+    A.print();
+
+
     return 0;
 }
